@@ -94,18 +94,11 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
 #tr .pit{flex:0 0 min(46vh,240px);height:min(46vh,240px);aspect-ratio:auto;scroll-snap-align:center;touch-action:pan-x;user-select:none}
 #tx2{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px}
 .th{font-size:.8rem;color:var(--mut)}
-#tbl{--z:1}
-.tt{padding-right:150px}
-#tc{font-size:calc(clamp(3rem,16vh,7rem)*var(--z))}
-#td{font-size:calc(1.2rem*var(--z))}
-#ts{font-size:calc(1.1rem*var(--z))}
-#te{font-size:calc(1.25rem*var(--z))}
-#tr .pit{flex:0 0 auto;height:min(calc(min(46vh,240px)*var(--z)),100%);aspect-ratio:1}
-#tr .pit p{font-size:calc(1.05rem*var(--z))}
-#tr .pit p.long{font-size:calc(.88rem*var(--z))}
-#tr .pit small{font-size:calc(.78rem*var(--z))}
-#tz{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:64px;display:flex;gap:8px}
-.tt{padding-right:200px}
+#hw,#tw{display:none}
+#hw svg,#tw svg{vertical-align:middle}
+#tw{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:64px;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
+@media (hover:hover) and (pointer:fine){#hw{display:inline-block}#tw{display:inline-flex}.tt{padding-right:240px}}
+body.pop #tw{display:none!important}
 </style>
 </head>
 <body>
@@ -113,7 +106,8 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
   <h1>Mi tablón</h1>
   <div class="bar">
     <div class="seg" id="seg"><button data-f="all">Todo</button><button data-f="w">Trabajo</button><button data-f="p">Personal</button></div>
-    <button class="ic" id="tbm" aria-label="Modo tablón">▣</button>
+    <button class="ic" id="tbm" aria-label="Modo tablón" title="Modo tablón a pantalla completa">▣</button>
+    <button class="ic" id="hw" aria-label="Tablón en ventana flotante" title="Tablón en ventana flotante"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><rect x="11" y="11" width="9" height="7" rx="1" fill="currentColor"/></svg></button>
     <button class="ic" id="ai" aria-label="Conectar con tu IA">✦</button>
     <button class="ic" id="hist" aria-label="Historial">↺</button>
     <button class="ic" id="theme" aria-label="Cambiar entre claro y oscuro">◐</button>
@@ -203,7 +197,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
 </div></dialog>
 
 <div id="tbl" hidden>
-  <div id="tz"><button class="ic" id="tzm" aria-label="Texto más pequeño">A−</button><button class="ic" id="tzp" aria-label="Texto más grande">A+</button><button class="ic" id="tpp" aria-label="Ventana flotante">⧉</button></div>
+  <button id="tw" title="Sacar el tablón a una ventana pequeña"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><rect x="11" y="11" width="9" height="7" rx="1" fill="currentColor"/></svg> Ventana flotante</button>
   <button class="ic" id="tx2" aria-label="Salir del modo tablón">✕</button>
   <div class="tt"><div id="tc"></div><div><div id="td"></div><div id="ts"></div></div></div>
   <div id="te"></div>
@@ -214,6 +208,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
 <script>
 var pipw=null;
 const POP=new URLSearchParams(location.search).get('pop')==='1';
+if(POP)document.body.classList.add('pop');
 const $=s=>document.querySelector(s)||(pipw&&pipw.document.querySelector(s));
 let S={items:[],filter:'all',theme:''};
 try{S=Object.assign(S,JSON.parse(localStorage.getItem('tablon')||'{}'))}catch(e){}
@@ -426,21 +421,17 @@ function tposits(){
   $('#tr').innerHTML=ns.length?ns.map(i=>`<button class="pit ${tone(i.u)}" data-id="${i.id}" style="--r:0deg"><span class="u">${i.u}</span><p class="${i.x.length>60?'long':''}">${esc(i.x)}</p><small>${dl(i.d)}</small></button>`).join(''):'<p class="empty">No hay notas pendientes.</p>';
 }
 async function awake(on){try{if(wl){try{await wl.release()}catch(e){}wl=null}const nv=(pipw||window).navigator;if(on&&nv.wakeLock)wl=await nv.wakeLock.request('screen')}catch(e){}}
-function tblMode(on){
+function tblMode(on,nofs){
   if(on&&pipw)return;
   if(!on&&pipw){pipw.close();return}
   if(!on&&POP){window.close();return}
   $('#tbl').hidden=!on;document.body.style.overflow=on?'hidden':'';
   clearInterval(tmr);awake(on);
-  if(on){tzset(TZ);tsig='';tposits();tclock();tmr=setInterval(tclock,1000);if(!POP)try{document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+  if(on){tsig='';tposits();tclock();tmr=setInterval(tclock,1000);if(!nofs&&!POP)try{document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
   else{try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}}
 }
 $('#tbm').onclick=()=>tblMode(true);
 $('#tx2').onclick=()=>tblMode(false);
-let TZ=+(S.tz||1);
-function tzset(v){TZ=Math.min(1.8,Math.max(.6,Math.round(v*10)/10));$('#tbl').style.setProperty('--z',TZ);S.tz=TZ;try{localStorage.setItem('tablon',JSON.stringify(S))}catch(e){}}
-$('#tzm').onclick=()=>tzset(TZ-.1);
-$('#tzp').onclick=()=>tzset(TZ+.1);
 async function openPip(){
   const el=$('#tbl');
   try{
@@ -448,7 +439,7 @@ async function openPip(){
     document.querySelectorAll('style,link[rel=stylesheet]').forEach(n=>w.document.head.appendChild(n.cloneNode(true)));
     const th=document.documentElement.dataset.theme;if(th)w.document.documentElement.dataset.theme=th;
     try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){}
-    pipw=w;w.document.body.append(el);
+    pipw=w;w.document.body.append(el);document.body.style.overflow='';
     w.document.addEventListener('keydown',tkey);
     w.document.addEventListener('visibilitychange',()=>{if(!w.document.hidden)awake(true)});
     w.addEventListener('pagehide',()=>{pipw=null;document.body.append(el);tblMode(false)});
@@ -460,13 +451,15 @@ function popOut(){
   const w=window.open(location.pathname+'?v=t&pop=1','tablon_ventana','popup=yes,width=480,height=360,left='+Math.max(0,screen.availWidth-500)+',top='+Math.max(0,screen.availHeight-420));
   if(w)tblMode(false);else alert('El navegador ha bloqueado la ventana. Permite las ventanas emergentes para esta página.');
 }
-$('#tpp').onclick=async()=>{
+async function floatOut(){
   if(pipw){pipw.close();return}
   if(window.documentPictureInPicture){if(await openPip())return}
   popOut();
-};
+}
+$('#hw').onclick=()=>{tblMode(true,true);floatOut()};
+$('#tw').onclick=()=>floatOut();
 window.addEventListener('storage',e=>{if(e.key==='tablon'&&e.newValue){try{S.items=JSON.parse(e.newValue).items||[];render()}catch(x){}}});
-function tkey(e){if($('#tbl').hidden)return;if(e.key==='Escape')tblMode(false);if(e.key==='+'||e.key==='=')tzset(TZ+.1);if(e.key==='-')tzset(TZ-.1)}
+function tkey(e){if(e.key==='Escape'&&!$('#tbl').hidden)tblMode(false)}
 document.addEventListener('keydown',tkey);
 document.addEventListener('visibilitychange',()=>{if(!$('#tbl').hidden&&!document.hidden)awake(true)});
 $('#tr').onpointerdown=e=>{const p=e.target.closest('.pit');tg=p?{p,x:e.clientX,y:e.clientY}:null};
