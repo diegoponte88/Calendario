@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mi tablón</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f5f8b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#e6ecf1;--ink:#1d2a35;--mut:#5d6e7c;--card:#fff;--line:#c9d4dc;--lo:#cfeedd;--mid:#ffe59a;--hi:#ffb9a8;--acc:#1f5f8b;--onacc:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -79,6 +84,16 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
 .dc .ch{background:rgba(255,255,255,.65)}
 .dc .ev{background:rgba(255,255,255,.6);color:#1d2a35}
 .dc .nd{color:#1d2a35}
+#tbl{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 18px calc(14px + env(safe-area-inset-bottom,0px))}
+.tt{display:flex;flex-wrap:wrap;align-items:center;gap:4px 24px;padding-right:56px}
+#tc{font-weight:800;font-size:clamp(3rem,16vh,7rem);line-height:1;letter-spacing:-.03em}
+#td{font-size:1.2rem;text-transform:capitalize;color:var(--mut)}
+#ts{font-size:1.1rem;margin-top:4px}
+#te{font-size:1.25rem;font-weight:600}
+#tr{flex:1;min-height:0;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;align-items:center;padding:6px 4px}
+#tr .pit{flex:0 0 min(46vh,240px);height:min(46vh,240px);aspect-ratio:auto;scroll-snap-align:center;touch-action:pan-x;user-select:none}
+#tx2{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px}
+.th{font-size:.8rem;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -86,6 +101,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
   <h1>Mi tablón</h1>
   <div class="bar">
     <div class="seg" id="seg"><button data-f="all">Todo</button><button data-f="w">Trabajo</button><button data-f="p">Personal</button></div>
+    <button class="ic" id="tbm" aria-label="Modo tablón">▣</button>
     <button class="ic" id="ai" aria-label="Conectar con tu IA">✦</button>
     <button class="ic" id="hist" aria-label="Historial">↺</button>
     <button class="ic" id="theme" aria-label="Cambiar entre claro y oscuro">◐</button>
@@ -98,6 +114,8 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
   <section id="meet"></section>
   <section id="board" class="board"></section>
   <section id="calv" hidden>
+    <div class="cbar" id="who" hidden></div>
+    <p class="nt" id="wn" hidden style="margin-bottom:8px"></p>
     <div class="cbar"><div class="mbox"><button id="cp" aria-label="Mes anterior">‹</button><span class="cm" id="cm"></span><button id="cn" aria-label="Mes siguiente">›</button></div><button id="ct">Hoy</button></div>
     <div class="cbar" id="paint"><span class="nt">Pintar turno:</span>
       <button data-p="M"><span class="ch M">M</span> Mañana</button><button data-p="T"><span class="ch T">T</span> Tarde</button><button data-p="N"><span class="ch N">N</span> Noche</button><button data-p="X"><span class="ch X">X</span> Saliente</button><button data-p="L"><span class="ch L">L</span> Libre</button><button data-p="-">Quitar</button></div>
@@ -141,6 +159,16 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
   <label>Dirección MCP<input id="mu" readonly></label>
   <div class="end"><button class="ghost" id="mc">Copiar</button><button class="ghost" id="mr">Generar otra</button></div>
   <p class="nt">En Claude: Personalizar, Conectores, Añadir conector personalizado, y pega esa dirección. Quien la tenga puede leer y escribir tus notas.</p>
+  <h2 style="font-size:1rem;margin:6px 0 0">Google Calendar y compartir</h2>
+  <div class="end"><button id="gg">Enlazar con Google Calendar</button></div>
+  <p class="nt">Añade tus turnos y eventos a tu Google Calendar. Google refresca estos calendarios cada pocas horas, no al instante.</p>
+  <button class="ghost" id="gr" style="padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit;cursor:pointer">Generar enlace nuevo de Google</button>
+  <h2 style="font-size:1rem;margin:10px 0 0">Compartir mi calendario</h2>
+  <p class="nt">Con una persona que tenga cuenta en este mismo tablón. Verá tus turnos y eventos personales, sin poder cambiarlos. Tus notas nunca se comparten.</p>
+  <div class="end"><input id="su" placeholder="Usuario de la otra persona" autocomplete="off" style="flex:1"><button id="sa">Compartir</button></div>
+  <p class="nt" id="se" style="font-weight:600;color:var(--ink)"></p>
+  <div id="sl"></div>
+  <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sw" style="width:auto;padding:0"> Incluir mis reuniones de trabajo</label>
   <label>Contraseña nueva (mínimo 8 caracteres)<input type="password" id="np" autocomplete="new-password"></label>
   <div class="end"><button class="ghost" id="pc">Cambiar contraseña</button><span class="sp"></span><button class="ghost" id="lo">Cerrar sesión</button><button id="ac">Cerrar</button></div>
 </div></dialog>
@@ -161,6 +189,14 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
   <div class="row"><label>Evento<input id="ex" placeholder="Cena, cumpleaños, cita…"></label><label>Hora (opcional)<input type="time" id="et"></label></div>
   <div class="end"><button id="ea">Añadir evento</button><span class="sp"></span><button class="ghost" id="dcl">Cerrar</button></div>
 </div></dialog>
+
+<div id="tbl" hidden>
+  <button class="ic" id="tx2" aria-label="Salir del modo tablón">✕</button>
+  <div class="tt"><div id="tc"></div><div><div id="td"></div><div id="ts"></div></div></div>
+  <div id="te"></div>
+  <div id="tr"></div>
+  <div class="th">Desliza un posit hacia arriba: hecho. Hacia abajo: para mañana.</div>
+</div>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -296,7 +332,7 @@ setInterval(pull,30000);
 const SH={M:'Mañana',T:'Tarde',N:'Noche',X:'Saliente',L:'Libre'};
 let view='b',cy=new Date().getFullYear(),cmn=new Date().getMonth(),paint=null,cday='';
 const rid=()=>Date.now()+Math.floor(Math.random()*1000);
-const shiftOf=d=>S.items.find(i=>i.t==='s'&&i.d===d);
+const shiftOf=d=>src().find(i=>i.t==='s'&&i.d===d);
 function setShift(d,s){
   S.items=S.items.filter(i=>!(i.t==='s'&&i.d===d));
   if(SH[s])S.items.push({id:rid(),t:'s',d,s,x:'',c:'p',u:0,h:'',done:false});
@@ -306,7 +342,7 @@ function cal(){
   const first=new Date(cy,cmn,1),start=(first.getDay()+6)%7,dim=new Date(cy,cmn+1,0).getDate();
   $('#cm').textContent=first.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
   const by={},sh={},cnt={},today=addDays(0);
-  S.items.forEach(i=>{if(i.t==='s')sh[i.d]=i.s;else if(i.d&&!i.done&&(i.t==='e'||i.t==='m'))(by[i.d]=by[i.d]||[]).push(i)});
+  src().forEach(i=>{if(i.t==='s')sh[i.d]=i.s;else if(i.d&&!i.done&&(i.t==='e'||i.t==='m'))(by[i.d]=by[i.d]||[]).push(i)});
   let h=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(x=>`<div class="dw">${x}</div>`).join('');
   const total=Math.ceil((start+dim)/7)*7;
   for(let k=0;k<total;k++){
@@ -320,13 +356,15 @@ function cal(){
   $('#cg').innerHTML=h;
   $('#cs').innerHTML='Turnos del mes: '+Object.keys(SH).map(k=>`<span style="margin-right:12px"><span class="ch ${k}">${k}</span> ${cnt[k]||0}</span>`).join('');
   $('#paint').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===paint));
+  $('#paint').hidden=!!who;
 }
 function dayView(){
   const d=cday,cur=shiftOf(d);
   $('#dh').textContent=new Date(d+'T00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $('#dsh').innerHTML=Object.keys(SH).map(k=>`<button data-s="${k}" aria-pressed="${!!cur&&cur.s===k}"><span class="ch ${k}">${k}</span> ${SH[k]}</button>`).join('')+'<button data-s="-">Sin turno</button>';
-  const ev=S.items.filter(i=>i.d===d&&!i.done&&(i.t==='e'||i.t==='m')).sort((a,b)=>(a.h||'').localeCompare(b.h||''));
-  $('#evl').innerHTML=ev.length?ev.map(i=>`<div class="hi-item"><span>${i.h?i.h+' ':''}${esc(i.x)}${i.t==='m'?' (reunión)':''}</span>${i.t==='e'?`<button class="rec" data-id="${i.id}">Borrar</button>`:''}</div>`).join(''):'<p class="nt">Sin eventos este día.</p>';
+  $('#dsh').innerHTML=who?(cur?'<span class="ch '+cur.s+'">'+cur.s+'</span> '+SH[cur.s]:'<span class="nt">Sin turno</span>'):Object.keys(SH).map(k=>`<button data-s="${k}" aria-pressed="${!!cur&&cur.s===k}"><span class="ch ${k}">${k}</span> ${SH[k]}</button>`).join('')+'<button data-s="-">Sin turno</button>';
+  const ev=src().filter(i=>i.d===d&&!i.done&&(i.t==='e'||i.t==='m')).sort((a,b)=>(a.h||'').localeCompare(b.h||''));
+  $('#evl').innerHTML=ev.length?ev.map(i=>`<div class="hi-item"><span>${i.h?i.h+' ':''}${esc(i.x)}${i.t==='m'?' (reunión)':''}</span>${i.t==='e'&&!who?`<button class="rec" data-id="${i.id}">Borrar</button>`:''}</div>`).join(''):'<p class="nt">Sin eventos este día.</p>';
+  $('#ex').closest('.row').hidden=!!who;$('#ea').hidden=!!who;
 }
 function addEv(){
   const x=$('#ex').value.trim();if(!x){$('#ex').focus();return}
@@ -342,7 +380,7 @@ function setView(v){
 }
 $('#tb1').onclick=()=>setView('b');
 $('#tb2').onclick=()=>setView('c');
-$('#cg').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;const d=b.dataset.d;if(paint){setShift(d,paint);cal()}else{cday=d;dayView();$('#ddlg').showModal()}};
+$('#cg').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;const d=b.dataset.d;if(paint&&!who){setShift(d,paint);cal()}else{cday=d;dayView();$('#ddlg').showModal()}};
 $('#paint').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;paint=paint===b.dataset.p?null:b.dataset.p;cal()};
 $('#dsh').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;setShift(cday,b.dataset.s);dayView();cal()};
 $('#evl').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;S.items=S.items.filter(i=>String(i.id)!==b.dataset.id);save();dayView();cal()};
@@ -352,9 +390,80 @@ $('#dcl').onclick=()=>$('#ddlg').close();
 $('#cp').onclick=()=>{cmn--;if(cmn<0){cmn=11;cy--}cal()};
 $('#cn').onclick=()=>{cmn++;if(cmn>11){cmn=0;cy++}cal()};
 $('#ct').onclick=()=>{cy=new Date().getFullYear();cmn=new Date().getMonth();cal()};
-const _render=render;render=function(){_render();if(view==='c')cal()};
+let tmr=0,wl=null,tg=null,tsig='';
+const byh=(a,b)=>(a.h||'99').localeCompare(b.h||'99');
+function tclock(){
+  const n=new Date(),t=iso(n),hm=n.toTimeString().slice(0,5);
+  $('#tc').textContent=hm;
+  $('#td').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  const sh=S.items.find(i=>i.t==='s'&&i.d===t);
+  $('#ts').innerHTML=sh?`<span class="ch ${sh.s}">${sh.s}</span> Turno ${SH[sh.s].toLowerCase()}`:'';
+  const ev=S.items.filter(i=>!i.done&&i.d===t&&(i.t==='e'||i.t==='m')).sort(byh);
+  const nx=ev.find(i=>i.h&&i.h>=hm),all=ev.filter(i=>!i.h),p=[];
+  if(nx)p.push('Próximo: '+nx.h+' '+nx.x);
+  if(all.length)p.push('Hoy: '+all.map(i=>i.x).join(', '));
+  $('#te').innerHTML=(p.length?p:['Sin más eventos hoy']).map(x=>`<div>${esc(x)}</div>`).join('');
+}
+function tposits(){
+  const ns=S.items.filter(i=>!i.done&&i.t==='n').sort((a,b)=>b.u-a.u||a.id-b.id);
+  const sig=JSON.stringify(ns.map(i=>[i.id,i.x,i.u,i.d]));
+  if(sig===tsig)return;tsig=sig;
+  $('#tr').innerHTML=ns.length?ns.map(i=>`<button class="pit ${tone(i.u)}" data-id="${i.id}" style="--r:0deg"><span class="u">${i.u}</span><p class="${i.x.length>60?'long':''}">${esc(i.x)}</p><small>${dl(i.d)}</small></button>`).join(''):'<p class="empty">No hay notas pendientes.</p>';
+}
+async function awake(on){try{if(on&&navigator.wakeLock)wl=await navigator.wakeLock.request('screen');else if(wl){await wl.release();wl=null}}catch(e){}}
+function tblMode(on){
+  $('#tbl').hidden=!on;document.body.style.overflow=on?'hidden':'';
+  clearInterval(tmr);awake(on);
+  if(on){tsig='';tposits();tclock();tmr=setInterval(tclock,1000);try{document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+  else{try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}}
+}
+$('#tbm').onclick=()=>tblMode(true);
+$('#tx2').onclick=()=>tblMode(false);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#tbl').hidden)tblMode(false)});
+document.addEventListener('visibilitychange',()=>{if(!$('#tbl').hidden&&!document.hidden)awake(true)});
+$('#tr').onpointerdown=e=>{const p=e.target.closest('.pit');tg=p?{p,x:e.clientX,y:e.clientY}:null};
+$('#tr').onpointercancel=()=>{tg=null};
+$('#tr').onpointerup=e=>{
+  if(!tg)return;
+  const dy=e.clientY-tg.y,dx=e.clientX-tg.x,i=S.items.find(i=>String(i.id)===tg.p.dataset.id);tg=null;
+  if(!i||Math.abs(dy)<60||Math.abs(dy)<Math.abs(dx)*1.5)return;
+  if(dy<0){i.done=true;i.dd=Date.now()}else i.d=addDays(1);
+  save();render();
+};
+const _render=render;render=function(){_render();if(view==='c')cal();if(!$('#tbl').hidden){tposits();tclock()}};
 render();
+let FD=null;
+async function feeds(body){try{FD=await api('/api/feeds',body?{method:'POST',body:JSON.stringify(body)}:{});void 0}catch(e){}return FD}
+const gcal=u=>'https://calendar.google.com/calendar/r?cid='+encodeURIComponent(u.replace(/^https:/,'webcal:'));
+const cp2=async(t,b)=>{try{await navigator.clipboard.writeText(t);b.textContent='Copiado'}catch(e){prompt('Copia este enlace:',t)}};
+$('#ai').addEventListener('click',()=>{feeds();shr()});
+$('#gg').onclick=async()=>{const f=FD||await feeds();if(f)window.open(gcal(f.own),'_blank')};
+$('#gr').onclick=async e=>{if(confirm('Los enlaces anteriores dejarán de funcionar. ¿Generar uno nuevo?')){await feeds({rotate:'own'});e.target.textContent='Hecho'}};
+let who='',OTH={},SHR={to:[],from:[],work:false};
+const src=()=>who?(OTH[who]||[]):S.items;
+function drawShr(){
+  if(who&&!SHR.from.includes(who))who='';
+  $('#sl').innerHTML=SHR.to.map(u=>`<div class="hi-item"><span>${esc(u)}</span><button class="rec" data-u="${esc(u)}">Dejar de compartir</button></div>`).join('');
+  $('#sw').checked=!!SHR.work;
+  const w=$('#who');w.hidden=!SHR.from.length;
+  w.innerHTML=SHR.from.length?'<button data-w="" aria-pressed="'+(!who)+'">Mi calendario</button>'+SHR.from.map(u=>`<button data-w="${esc(u)}" aria-pressed="${who===u}">${esc(u)}</button>`).join(''):'';
+  $('#wn').hidden=!who;$('#wn').textContent=who?'Calendario de '+who+', solo lectura.':'';
+}
+async function shr(body){
+  try{SHR=await api('/api/share',body?{method:'POST',body:JSON.stringify(body)}:{});$('#se').textContent=''}
+  catch(e){$('#se').textContent=e.message}
+  drawShr();cal();return SHR;
+}
+async function pullWho(){if(!who||!TOK)return;try{OTH[who]=(await api('/api/calendario/de?u='+encodeURIComponent(who))).items}catch(e){OTH[who]=[]}cal()}
+$('#who').onclick=async e=>{const b=e.target.closest('[data-w]');if(!b)return;who=b.dataset.w;if(who)await pullWho();drawShr();cal()};
+$('#sa').onclick=()=>{const u=$('#su').value.trim().toLowerCase();if(u){shr({add:u});$('#su').value=''}};
+$('#su').onkeydown=e=>{if(e.key==='Enter')$('#sa').click()};
+$('#sl').onclick=e=>{const b=e.target.closest('[data-u]');if(b)shr({remove:b.dataset.u})};
+$('#sw').onchange=()=>shr({work:$('#sw').checked});
+const _sv=setView;setView=function(v){_sv(v);if(v==='c'&&TOK)shr()};
+setInterval(pullWho,30000);
 if(TOK)pull();else showLogin();
+{const q=new URLSearchParams(location.search);if(q.get('v')==='c')setView('c');if(q.get('v')==='t')tblMode(true);if(q.get('add')&&TOK)openD()}
 </script>
 </body>
 </html>
