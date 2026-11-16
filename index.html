@@ -99,6 +99,44 @@ button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-vis
 #tw{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:64px;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
 @media (hover:hover) and (pointer:fine){#hw{display:inline-block}#tw{display:inline-flex}.tt{padding-right:240px}}
 body.pop #tw{display:none!important}
+.chs{display:inline-flex;gap:2px}
+.grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+.dc{min-width:0}
+.dc.sh{color:#1d2a35;border-color:transparent}
+.dc .ev{background:var(--bg);color:var(--ink)}
+.dc.sh .ev{background:rgba(255,255,255,.6);color:#1d2a35}
+.dc .nd{color:var(--mut)}
+.dc.sh .nd{color:#1d2a35}
+.jl{display:flex;align-items:center;gap:2px;font-size:.7rem}
+.jl i{font-style:normal;font-weight:800}
+.dc .jl .ch.M{background:#ffd166}.dc .jl .ch.T{background:#f4a261}.dc .jl .ch.N{background:#a5b4fc}.dc .jl .ch.X{background:#d8b4fe}.dc .jl .ch.L{background:#86efac}
+.jr{display:flex;align-items:center;gap:6px;width:100%}
+.hi-item{flex-wrap:wrap}
+#dlg .end{position:sticky;bottom:0;background:var(--card);padding:8px 0 2px}
+dialog{max-height:calc(100dvh - 16px);overflow:auto}
+html,body{overflow-x:hidden}
+#bnav{display:none}
+@media (max-width:700px){
+  header{flex-direction:column;align-items:flex-start;padding:12px 12px 6px;gap:8px}
+  h1{font-size:1.5rem}
+  .bar{flex-wrap:wrap;gap:6px}
+  .ic{width:38px;height:38px}
+  .seg button{padding:7px 11px;font-size:.9rem}
+  main{padding:0 12px 130px}
+  .tabs{display:none}
+  .fab{display:none!important}
+  .board{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .pit{padding:10px}
+  .pit p{font-size:.95rem}
+  .mt{grid-template-columns:4.2rem 1fr}
+  .mt em{grid-column:2}
+  .cbar{gap:6px}
+  .dc{min-height:60px;padding:3px}
+  #bnav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px))}
+  #bnav button{background:none;border:0;color:var(--mut);font:inherit;padding:10px 6px;cursor:pointer}
+  #bnav button[aria-pressed="true"]{color:var(--acc);font-weight:700}
+  #bnav #bplus{width:58px;height:58px;border-radius:50%;margin:-26px 14px 0;background:var(--acc);color:var(--onacc);font-size:2rem;line-height:1;padding:0;box-shadow:0 8px 18px -6px rgba(0,0,0,.45)}
+}
 </style>
 </head>
 <body>
@@ -123,13 +161,14 @@ body.pop #tw{display:none!important}
     <div class="cbar" id="who" hidden></div>
     <p class="nt" id="wn" hidden style="margin-bottom:8px"></p>
     <div class="cbar"><div class="mbox"><button id="cp" aria-label="Mes anterior">‹</button><span class="cm" id="cm"></span><button id="cn" aria-label="Mes siguiente">›</button></div><button id="ct">Hoy</button></div>
-    <div class="cbar" id="paint"><span class="nt">Pintar turno:</span>
+    <div class="cbar" id="paint"><span class="nt">Pintar turno (toca dos si doblas):</span>
       <button data-p="M"><span class="ch M">M</span> Mañana</button><button data-p="T"><span class="ch T">T</span> Tarde</button><button data-p="N"><span class="ch N">N</span> Noche</button><button data-p="X"><span class="ch X">X</span> Saliente</button><button data-p="L"><span class="ch L">L</span> Libre</button><button data-p="-">Quitar</button></div>
     <div class="grid" id="cg"></div>
     <p class="nt" id="cs" style="margin-top:12px"></p>
   </section>
 </main>
 <button class="fab" id="add" aria-label="Añadir nota o reunión">+</button>
+<nav id="bnav" aria-label="Navegación"><button id="b1" aria-pressed="true">Tablón</button><button id="bplus" aria-label="Añadir">+</button><button id="b2" aria-pressed="false">Calendario</button></nav>
 
 <dialog id="dlg"><div class="pad">
   <h2 id="dt">Nueva nota</h2>
@@ -170,8 +209,9 @@ body.pop #tw{display:none!important}
   <p class="nt">Añade tus turnos y eventos a tu Google Calendar. Google refresca estos calendarios cada pocas horas, no al instante.</p>
   <button class="ghost" id="gr" style="padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit;cursor:pointer">Generar enlace nuevo de Google</button>
   <h2 style="font-size:1rem;margin:10px 0 0">Compartir mi calendario</h2>
-  <p class="nt">Con una persona que tenga cuenta en este mismo tablón. Verá tus turnos y eventos personales, sin poder cambiarlos. Tus notas nunca se comparten.</p>
+  <p class="nt">Con una persona que tenga cuenta en este mismo tablón. Verá tus turnos y eventos personales; tú decides si también puede modificarlos. Tus notas nunca se comparten. Con ellos tendrás la vista «Juntos».</p>
   <div class="end"><input id="su" placeholder="Usuario de la otra persona" autocomplete="off" style="flex:1"><button id="sa">Compartir</button></div>
+  <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sx" style="width:auto;padding:0"> Pueden modificarlo ellos también</label>
   <p class="nt" id="se" style="font-weight:600;color:var(--ink)"></p>
   <div id="sl"></div>
   <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sw" style="width:auto;padding:0"> Incluir mis reuniones de trabajo</label>
@@ -214,25 +254,47 @@ let S={items:[],filter:'all',theme:''};
 try{S=Object.assign(S,JSON.parse(localStorage.getItem('tablon')||'{}'))}catch(e){}
 let API=localStorage.getItem('tb_api')||'',TOK=localStorage.getItem('tb_tok')||'',dirty=false,pt=0;
 const setSync=t=>{$('#sy').textContent=t};
+let REV=0,base=new Map();
 async function api(p,o={}){
   const r=await fetch(API+p,{...o,headers:{'content-type':'application/json',...(TOK?{authorization:'Bearer '+TOK}:{})}});
   const j=await r.json().catch(()=>({}));
   if(r.status===401&&TOK){logout();throw new Error('Sesión caducada')}
-  if(!r.ok)throw new Error(j.error||'Error '+r.status);
+  if(!r.ok){const er=new Error(j.error||'Error '+r.status);er.status=r.status;er.data=j;throw er}
   return j;
+}
+const setBase=a=>{base=new Map(a.map(i=>[String(i.id),JSON.stringify(i)]))};
+function merge(local,server){
+  const L=new Map(local.map(i=>[String(i.id),i])),R=new Map(server.map(i=>[String(i.id),i])),out=[];
+  new Set([...L.keys(),...R.keys(),...base.keys()]).forEach(k=>{
+    const b=base.get(k),l=L.get(k),r=R.get(k),lj=l&&JSON.stringify(l),rj=r&&JSON.stringify(r);
+    const pick=(lj!==b&&rj===b)?l:(lj===b&&rj!==b)?r:l;
+    if(pick)out.push(pick);
+  });
+  const seen={};
+  return out.sort((a,b)=>b.id-a.id).filter(i=>{if(i.t!=='s')return true;if(seen[i.d])return false;seen[i.d]=1;return true});
 }
 function syncAll(){
   dirty=true;clearTimeout(pt);
   pt=setTimeout(async()=>{
     if(!TOK)return;
-    try{await api('/api/items',{method:'PUT',body:JSON.stringify(S.items)});dirty=false;setSync('Sincronizado')}
-    catch(e){setSync('Sin conexión. Queda guardado en este aparato.')}
+    for(let n=0;n<3;n++){
+      try{const j=await api('/api/items',{method:'PUT',body:JSON.stringify({items:S.items,rev:REV})});REV=j.rev;setBase(S.items);dirty=false;setSync('Sincronizado');return}
+      catch(e){
+        if(e.status===409){
+          S.items=merge(S.items,e.data.items);REV=e.data.rev;setBase(e.data.items);
+          if(typeof cur!=='undefined'&&cur)cur=S.items.find(i=>i.id===cur.id)||cur;
+          try{localStorage.setItem('tablon',JSON.stringify(S))}catch(x){}
+          render();continue;
+        }
+        setSync('Sin conexión. Queda guardado en este aparato.');return;
+      }
+    }
   },400);
 }
 const save=()=>{try{localStorage.setItem('tablon',JSON.stringify(S))}catch(e){};syncAll()};
 async function pull(){
   if(!TOK||dirty||$('#dlg').open)return;
-  try{const j=await api('/api/items');S.items=j.items;try{localStorage.setItem('tablon',JSON.stringify(S))}catch(e){};setSync('Sincronizado');render()}
+  try{const j=await api('/api/items');S.items=j.items;REV=j.rev||0;setBase(j.items);try{localStorage.setItem('tablon',JSON.stringify(S))}catch(e){};setSync('Sincronizado');render()}
   catch(e){setSync('Sin conexión.')}
 }
 function showLogin(){$('#lsv').value=API;if(!$('#ldlg').open)$('#ldlg').showModal()}
@@ -339,61 +401,125 @@ $('#lre').onclick=()=>auth('/api/register');
 $('#ldlg').oncancel=e=>{if(!TOK)e.preventDefault()};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
 setInterval(pull,30000);
-const SH={M:'Mañana',T:'Tarde',N:'Noche',X:'Saliente',L:'Libre'};
+const SH={M:'Mañana',T:'Tarde',N:'Noche',X:'Saliente',L:'Libre'},ORD='MTNXL',COL={M:'#ffd166',T:'#f4a261',N:'#a5b4fc',X:'#d8b4fe',L:'#86efac'};
 let view='b',cy=new Date().getFullYear(),cmn=new Date().getMonth(),paint=null,cday='';
+let who='',OTH={},SHR={me:'',to:[],edit:[],from:[],fromEdit:[],work:false};
 const rid=()=>Date.now()+Math.floor(Math.random()*1000);
+const ltr=s=>String(s||'').split('').filter(c=>SH[c]);
+const chips=s=>ltr(s).map(c=>`<span class="ch ${c}">${c}</span>`).join('');
+const shName=s=>ltr(s).map(c=>SH[c].toLowerCase()).join(' y ');
+const shBg=s=>{const a=ltr(s).map(c=>COL[c]);return a.length>1?`linear-gradient(135deg,${a[0]} 50%,${a[1]} 50%)`:(a[0]||'')};
+function togg(cur,k){
+  let a=ltr(cur);
+  if(a.includes(k))a=a.filter(x=>x!==k);
+  else if(k==='L')a=['L'];
+  else{a=a.filter(x=>x!=='L');a.push(k);if(a.length>2)a.shift()}
+  return a.sort((x,y)=>ORD.indexOf(x)-ORD.indexOf(y)).join('');
+}
+const JU=()=>who==='*';
+const ro=()=>!!who&&!JU()&&!SHR.fromEdit.includes(who);
+const src=()=>(who&&!JU())?(OTH[who]||[]):S.items;
 const shiftOf=d=>src().find(i=>i.t==='s'&&i.d===d);
-function setShift(d,s){
+const people=()=>[{n:SHR.me||'yo',items:S.items}].concat(SHR.from.map(u=>({n:u,items:OTH[u]||[]})));
+async function remote(body){
+  try{const j=await api('/api/calendario/de?u='+encodeURIComponent(who),{method:'POST',body:JSON.stringify(body)});OTH[who]=j.items}
+  catch(e){$('#wn').hidden=false;$('#wn').textContent='No se pudo guardar: '+e.message}
+}
+async function setShift(d,s){
+  s=ltr(s).join('');
+  if(who&&!JU()){await remote({op:'shift',d,s});return}
   S.items=S.items.filter(i=>!(i.t==='s'&&i.d===d));
-  if(SH[s])S.items.push({id:rid(),t:'s',d,s,x:'',c:'p',u:0,h:'',done:false});
+  if(s)S.items.push({id:rid(),t:'s',d,s,x:'',c:'p',u:0,h:'',done:false});
   save();
+}
+async function addEvent(d,h,x){
+  if(who&&!JU()){await remote({op:'add',d,h,x});return}
+  S.items.push({id:rid(),t:'e',d,x,h,c:'p',u:0,done:false});save();
+}
+async function delEvent(id){
+  if(who&&!JU()){await remote({op:'del',id});return}
+  S.items=S.items.filter(i=>String(i.id)!==String(id));save();
 }
 function cal(){
   const first=new Date(cy,cmn,1),start=(first.getDay()+6)%7,dim=new Date(cy,cmn+1,0).getDate();
   $('#cm').textContent=first.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
-  const by={},sh={},cnt={},today=addDays(0);
-  src().forEach(i=>{if(i.t==='s')sh[i.d]=i.s;else if(i.d&&!i.done&&(i.t==='e'||i.t==='m'))(by[i.d]=by[i.d]||[]).push(i)});
+  const today=addDays(0),total=Math.ceil((start+dim)/7)*7,J=JU();
+  const P=J?people():[{n:'',items:src()}];
+  const ini=P.map(p=>J?(P.filter(q=>q.n[0]===p.n[0]).length>1?p.n.slice(0,2):p.n[0]).toUpperCase():'');
+  const sh=P.map(p=>{const m={};p.items.forEach(i=>{if(i.t==='s')m[i.d]=i.s});return m});
+  const ev={},cnt=P.map(()=>({}));
+  P.forEach((p,k)=>p.items.forEach(i=>{if(i.d&&!i.done&&(i.t==='e'||i.t==='m'))(ev[i.d]=ev[i.d]||[]).push({i,k})}));
   let h=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(x=>`<div class="dw">${x}</div>`).join('');
-  const total=Math.ceil((start+dim)/7)*7;
-  for(let k=0;k<total;k++){
-    const dt=new Date(cy,cmn,1-start+k),d=iso(dt),inm=dt.getMonth()===cmn,s=sh[d],ev=(by[d]||[]).sort((a,b)=>(a.h||'').localeCompare(b.h||''));
-    if(inm&&s)cnt[s]=(cnt[s]||0)+1;
-    h+=`<button class="dc${inm?'':' out'}${d===today?' today':''}${s?' '+s:''}" data-d="${d}"><span class="top"><b>${dt.getDate()}</b>${s?`<span class="ch ${s}">${s}</span>`:''}</span>`
-      +ev.slice(0,2).map(e=>`<span class="ev">${e.h?e.h+' ':''}${esc(e.x)}</span>`).join('')
-      +(ev.length>2?`<span class="ev">+${ev.length-2} más</span>`:'')
-      +(ev.length?`<span class="nd">${ev.length} ev.</span>`:'')+'</button>';
+  for(let n=0;n<total;n++){
+    const dt=new Date(cy,cmn,1-start+n),d=iso(dt),inm=dt.getMonth()===cmn;
+    const es=(ev[d]||[]).sort((a,b)=>(a.i.h||'').localeCompare(b.i.h||''));
+    P.forEach((p,j)=>{const s=sh[j][d];if(inm&&s){ltr(s).forEach(c=>cnt[j][c]=(cnt[j][c]||0)+1);if(ltr(s).length>1)cnt[j].dbl=(cnt[j].dbl||0)+1}});
+    let cls='dc'+(inm?'':' out')+(d===today?' today':''),style='',top;
+    if(!J){
+      const s=sh[0][d];
+      if(s){cls+=' sh';style=` style="background:${shBg(s)}"`}
+      top=`<span class="top"><b>${dt.getDate()}</b><span class="chs">${chips(s)}</span></span>`;
+    }else{
+      top=`<span class="top"><b>${dt.getDate()}</b></span>`+P.map((p,j)=>sh[j][d]?`<span class="jl"><i>${esc(ini[j])}</i>${chips(sh[j][d])}</span>`:'').join('');
+    }
+    const pre=e=>(J?ini[e.k]+' ':'')+(e.i.h?e.i.h+' ':'');
+    h+=`<button class="${cls}"${style} data-d="${d}">${top}`+es.slice(0,2).map(e=>`<span class="ev">${esc(pre(e)+e.i.x)}</span>`).join('')+(es.length>2?`<span class="ev">+${es.length-2} más</span>`:'')+(es.length?`<span class="nd">${es.length} ev.</span>`:'')+'</button>';
   }
   $('#cg').innerHTML=h;
-  $('#cs').innerHTML='Turnos del mes: '+Object.keys(SH).map(k=>`<span style="margin-right:12px"><span class="ch ${k}">${k}</span> ${cnt[k]||0}</span>`).join('');
-  $('#paint').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===paint));
-  $('#paint').hidden=!!who;
+  $('#cs').innerHTML=P.map((p,j)=>(J?`<div><b>${esc(p.n)}</b>: `:'Turnos del mes: ')+Object.keys(SH).map(c=>`<span style="margin-right:10px"><span class="ch ${c}">${c}</span> ${cnt[j][c]||0}</span>`).join('')+(cnt[j].dbl?`<span>dobles ${cnt[j].dbl}</span>`:'')+(J?'</div>':'')).join('');
+  $('#paint').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p==='-'?paint==='-':(!!paint&&paint!=='-'&&paint.includes(b.dataset.p))));
+  $('#paint').hidden=ro();
 }
 function dayView(){
-  const d=cday,cur=shiftOf(d);
+  const d=cday,J=JU(),R=ro();
   $('#dh').textContent=new Date(d+'T00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $('#dsh').innerHTML=who?(cur?'<span class="ch '+cur.s+'">'+cur.s+'</span> '+SH[cur.s]:'<span class="nt">Sin turno</span>'):Object.keys(SH).map(k=>`<button data-s="${k}" aria-pressed="${!!cur&&cur.s===k}"><span class="ch ${k}">${k}</span> ${SH[k]}</button>`).join('')+'<button data-s="-">Sin turno</button>';
-  const ev=src().filter(i=>i.d===d&&!i.done&&(i.t==='e'||i.t==='m')).sort((a,b)=>(a.h||'').localeCompare(b.h||''));
-  $('#evl').innerHTML=ev.length?ev.map(i=>`<div class="hi-item"><span>${i.h?i.h+' ':''}${esc(i.x)}${i.t==='m'?' (reunión)':''}</span>${i.t==='e'&&!who?`<button class="rec" data-id="${i.id}">Borrar</button>`:''}</div>`).join(''):'<p class="nt">Sin eventos este día.</p>';
-  $('#ex').closest('.row').hidden=!!who;$('#ea').hidden=!!who;
+  const cur=((J||!who?S.items:src()).find(i=>i.t==='s'&&i.d===d)||{}).s||'';
+  let h='';
+  if(J)h+=people().map(p=>{const s=(p.items.find(i=>i.t==='s'&&i.d===d)||{}).s;return `<div class="jr"><b>${esc(p.n)}</b> ${s?chips(s)+' '+shName(s):'<span class="nt">sin turno</span>'}</div>`}).join('')+'<div class="nt" style="width:100%">Tu turno:</div>';
+  if(R)h=cur?chips(cur)+' '+shName(cur):'<span class="nt">Sin turno</span>';
+  else h+=Object.keys(SH).map(k=>`<button data-s="${k}" aria-pressed="${ltr(cur).includes(k)}"><span class="ch ${k}">${k}</span> ${SH[k]}</button>`).join('')+'<button data-s="-">Sin turno</button><span class="nt" style="width:100%">Si doblas turno, toca dos (por ejemplo mañana y tarde).</span>';
+  $('#dsh').innerHTML=h;
+  const P=J?people():[{n:'',items:src()}],ev=[];
+  P.forEach((p,k)=>p.items.forEach(i=>{if(i.d===d&&!i.done&&(i.t==='e'||i.t==='m'))ev.push({i,k,n:p.n})}));
+  ev.sort((a,b)=>(a.i.h||'').localeCompare(b.i.h||''));
+  const del=e=>e.i.t==='e'&&!R&&(!J||e.k===0);
+  $('#evl').innerHTML=ev.length?ev.map(e=>`<div class="hi-item"><span>${e.i.h?e.i.h+' ':''}${esc(e.i.x)}${J?' <span class="nt">('+esc(e.n)+')</span>':''}${e.i.t==='m'?' (reunión)':''}</span>${del(e)?`<button class="rec" data-id="${e.i.id}">Borrar</button>`:''}</div>`).join(''):'<p class="nt">Sin eventos este día.</p>';
+  $('#ex').closest('.row').hidden=R;$('#ea').hidden=R;
 }
-function addEv(){
+async function addEv(){
   const x=$('#ex').value.trim();if(!x){$('#ex').focus();return}
-  S.items.push({id:rid(),t:'e',d:cday,x,h:$('#et').value,c:'p',u:0,done:false});
-  save();$('#ex').value='';$('#et').value='';dayView();cal();
+  await addEvent(cday,$('#et').value,x);
+  $('#ex').value='';$('#et').value='';dayView();cal();
 }
 function setView(v){
   view=v;
-  $('#tb1').setAttribute('aria-pressed',v==='b');$('#tb2').setAttribute('aria-pressed',v==='c');
+  ['#tb1','#b1'].forEach(s=>$(s).setAttribute('aria-pressed',v==='b'));
+  ['#tb2','#b2'].forEach(s=>$(s).setAttribute('aria-pressed',v==='c'));
   ['#sum','#meet','#board'].forEach(s=>$(s).hidden=v==='c');
   $('#calv').hidden=v!=='c';$('#add').hidden=v==='c';
   if(v==='c')cal();
 }
+function plus(){if(view==='c'){cday=addDays(0);dayView();$('#ddlg').showModal()}else openD()}
 $('#tb1').onclick=()=>setView('b');
 $('#tb2').onclick=()=>setView('c');
-$('#cg').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;const d=b.dataset.d;if(paint&&!who){setShift(d,paint);cal()}else{cday=d;dayView();$('#ddlg').showModal()}};
-$('#paint').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;paint=paint===b.dataset.p?null:b.dataset.p;cal()};
-$('#dsh').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;setShift(cday,b.dataset.s);dayView();cal()};
-$('#evl').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;S.items=S.items.filter(i=>String(i.id)!==b.dataset.id);save();dayView();cal()};
+$('#b1').onclick=()=>setView('b');
+$('#b2').onclick=()=>setView('c');
+$('#bplus').onclick=plus;
+$('#cg').onclick=async e=>{
+  const b=e.target.closest('[data-d]');if(!b)return;const d=b.dataset.d;
+  if(paint&&!ro()){await setShift(d,paint==='-'?'':paint);cal();return}
+  cday=d;dayView();$('#ddlg').showModal();
+};
+$('#paint').onclick=e=>{
+  const b=e.target.closest('[data-p]');if(!b)return;const k=b.dataset.p;
+  paint=k==='-'?(paint==='-'?null:'-'):(togg(paint==='-'?'':paint,k)||null);cal();
+};
+$('#dsh').onclick=async e=>{
+  const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;
+  const cur=((JU()||!who?S.items:src()).find(i=>i.t==='s'&&i.d===cday)||{}).s||'';
+  await setShift(cday,k==='-'?'':togg(cur,k));dayView();cal();
+};
+$('#evl').onclick=async e=>{const b=e.target.closest('[data-id]');if(!b)return;await delEvent(b.dataset.id);dayView();cal()};
 $('#ea').onclick=addEv;
 $('#ex').onkeydown=e=>{if(e.key==='Enter')addEv()};
 $('#dcl').onclick=()=>$('#ddlg').close();
@@ -407,7 +533,7 @@ function tclock(){
   $('#tc').textContent=hm;
   $('#td').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
   const sh=S.items.find(i=>i.t==='s'&&i.d===t);
-  $('#ts').innerHTML=sh?`<span class="ch ${sh.s}">${sh.s}</span> Turno ${SH[sh.s].toLowerCase()}`:'';
+  $('#ts').innerHTML=sh?chips(sh.s)+' Turno '+shName(sh.s):'';
   const ev=S.items.filter(i=>!i.done&&i.d===t&&(i.t==='e'||i.t==='m')).sort(byh);
   const nx=ev.find(i=>i.h&&i.h>=hm),all=ev.filter(i=>!i.h),p=[];
   if(nx)p.push('Próximo: '+nx.h+' '+nx.x);
@@ -480,29 +606,41 @@ const cp2=async(t,b)=>{try{await navigator.clipboard.writeText(t);b.textContent=
 $('#ai').addEventListener('click',()=>{feeds();shr()});
 $('#gg').onclick=async()=>{const f=FD||await feeds();if(f)window.open(gcal(f.own),'_blank')};
 $('#gr').onclick=async e=>{if(confirm('Los enlaces anteriores dejarán de funcionar. ¿Generar uno nuevo?')){await feeds({rotate:'own'});e.target.textContent='Hecho'}};
-let who='',OTH={},SHR={to:[],from:[],work:false};
-const src=()=>who?(OTH[who]||[]):S.items;
 function drawShr(){
-  if(who&&!SHR.from.includes(who))who='';
-  $('#sl').innerHTML=SHR.to.map(u=>`<div class="hi-item"><span>${esc(u)}</span><button class="rec" data-u="${esc(u)}">Dejar de compartir</button></div>`).join('');
+  if(who&&!JU()&&!SHR.from.includes(who))who='';
+  if(JU()&&!SHR.from.length)who='';
+  $('#sl').innerHTML=SHR.to.map(u=>{const e=SHR.edit.includes(u);return `<div class="hi-item"><span>${esc(u)}${e?' (puede modificar)':' (solo ve)'}</span><span><button class="rec" data-e="${esc(u)}">${e?'Solo ver':'Permitir modificar'}</button> <button class="rec" data-u="${esc(u)}">Dejar de compartir</button></span></div>`}).join('');
   $('#sw').checked=!!SHR.work;
   const w=$('#who');w.hidden=!SHR.from.length;
-  w.innerHTML=SHR.from.length?'<button data-w="" aria-pressed="'+(!who)+'">Mi calendario</button>'+SHR.from.map(u=>`<button data-w="${esc(u)}" aria-pressed="${who===u}">${esc(u)}</button>`).join(''):'';
-  $('#wn').hidden=!who;$('#wn').textContent=who?'Calendario de '+who+', solo lectura.':'';
+  const bt=(v,t)=>`<button data-w="${esc(v)}" aria-pressed="${who===v}">${esc(t)}</button>`;
+  w.innerHTML=SHR.from.length?bt('','Mi calendario')+SHR.from.map(u=>bt(u,u)).join('')+bt('*','Juntos'):'';
+  $('#wn').hidden=!who;
+  $('#wn').textContent=!who?'':JU()?'Juntos: tu calendario y los de quienes lo comparten contigo. Lo que añadas va a tu calendario.':(ro()?'Calendario de '+who+', solo lectura.':'Calendario de '+who+'. Puedes modificarlo.');
 }
 async function shr(body){
-  try{SHR=await api('/api/share',body?{method:'POST',body:JSON.stringify(body)}:{});$('#se').textContent=''}
+  try{SHR=Object.assign({me:'',to:[],edit:[],from:[],fromEdit:[],work:false},await api('/api/share',body?{method:'POST',body:JSON.stringify(body)}:{}));$('#se').textContent=''}
   catch(e){$('#se').textContent=e.message}
   drawShr();cal();return SHR;
 }
-async function pullWho(){if(!who||!TOK)return;try{OTH[who]=(await api('/api/calendario/de?u='+encodeURIComponent(who))).items}catch(e){OTH[who]=[]}cal()}
+async function pullWho(){
+  if(!TOK||!who)return;
+  try{
+    if(JU())await Promise.all(SHR.from.map(async u=>{OTH[u]=(await api('/api/calendario/de?u='+encodeURIComponent(u))).items}));
+    else OTH[who]=(await api('/api/calendario/de?u='+encodeURIComponent(who))).items;
+  }catch(e){}
+  cal();
+}
 $('#who').onclick=async e=>{const b=e.target.closest('[data-w]');if(!b)return;who=b.dataset.w;if(who)await pullWho();drawShr();cal()};
-$('#sa').onclick=()=>{const u=$('#su').value.trim().toLowerCase();if(u){shr({add:u});$('#su').value=''}};
+$('#sa').onclick=()=>{const u=$('#su').value.trim().toLowerCase();if(u){shr({add:u,edit:$('#sx').checked});$('#su').value=''}};
 $('#su').onkeydown=e=>{if(e.key==='Enter')$('#sa').click()};
-$('#sl').onclick=e=>{const b=e.target.closest('[data-u]');if(b)shr({remove:b.dataset.u})};
+$('#sl').onclick=e=>{
+  const t=e.target.closest('[data-e]');if(t){shr({setedit:t.dataset.e,edit:!SHR.edit.includes(t.dataset.e)});return}
+  const b=e.target.closest('[data-u]');if(b)shr({remove:b.dataset.u});
+};
 $('#sw').onchange=()=>shr({work:$('#sw').checked});
 const _sv=setView;setView=function(v){_sv(v);if(v==='c'&&TOK)shr()};
 setInterval(pullWho,30000);
+setInterval(()=>{if(view==='c'&&TOK)shr()},60000);
 if(TOK)pull();else showLogin();
 {const q=new URLSearchParams(location.search);if(q.get('v')==='c')setView('c');if(q.get('v')==='t')tblMode(true);if(q.get('add')&&TOK)openD()}
 </script>
